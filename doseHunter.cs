@@ -51,7 +51,7 @@ namespace VMS.TPS
             }
             #endregion
             #region extract_VolumeAtDose
-            internal double extract_VolumeAtDose(List<(double, double)> dvh_table, string Value, PlanSetup MyPlan, Structure MyStruct) // Function to calculate the Volume at certain Dose (Gy) from the DVHData
+            internal double extract_VolumeAtDose(List<(double, double)> dvh_table, string Value, PlanSetup MyPlan, Structure MyStruct) // Function to calculate the Volume at certain Dose (cGy) from the DVHData
             {
                 double closestVolume = 0;
                 double VolumeAsked = 0.0000, DoseAsked = 0.0000;
@@ -107,7 +107,7 @@ namespace VMS.TPS
                             if (unit.Value == "%") //Relative volume
                             {
                                 closestVolume = dvh_table.Where(pair => Math.Abs(pair.Item2 - VolumeAsked) < toleranceV).Select(pair => pair.Item1).FirstOrDefault();
-                                if (VolumeAsked == 100) // permet de gérer les multiples valeurs de dose pour le 100% de couverture dans l'HDV cumulatif
+                                if (VolumeAsked == 100) // permet de gÃ©rer les multiples valeurs de dose pour le 100% de couverture dans l'HDV cumulatif
                                 {
                                     closestVolume = dvh_table.Where(pair => Math.Abs(pair.Item2 - VolumeAsked) < toleranceV).Select(pair => pair.Item1).LastOrDefault();
                                 }
@@ -125,7 +125,7 @@ namespace VMS.TPS
                     Console.WriteLine(ex.ToString(), " for {0} ", Value);
                 }
                 #endregion
-                #region V__Gy
+                #region V__cGy
                 try
                 {
                     if (Value.Contains("V")) // ne fonctionne pas sans cette condition
@@ -141,7 +141,7 @@ namespace VMS.TPS
                             if (unit.Value == "%") //Relative Volume
                             {
                                 closestVolume = dvh_table.Where(pair => Math.Abs(pair.Item1 - DoseAsked) < ToleranceD).Select(pair => pair.Item2).FirstOrDefault();
-                                if (VolumeAsked == 100) // permet de gérer les multiples valeurs de couverture pour la dose dans l'HDV cumulatif
+                                if (VolumeAsked == 100) // permet de gÃ©rer les multiples valeurs de couverture pour la dose dans l'HDV cumulatif
                                 {
                                     closestVolume = dvh_table.Where(pair => Math.Abs(pair.Item1 - DoseAsked) < ToleranceD).Select(pair => pair.Item2).LastOrDefault();
                                 }
@@ -346,11 +346,11 @@ namespace VMS.TPS
                     if (line != null)
                     {
                         filterTags = line.Split(':');
-                        if (filterTags[0] == "Min Total Dose (Gy)")
+                        if (filterTags[0] == "Min Total Dose (cGy)")
                         {
                             minTotalDose = Convert.ToDouble(filterTags[1]);
                         }
-                        if (filterTags[0] == "Max Total Dose (Gy)")
+                        if (filterTags[0] == "Max Total Dose (cGy)")
                         {
                             maxTotalDose = Convert.ToDouble(filterTags[1]);
                         }
@@ -485,7 +485,7 @@ namespace VMS.TPS
 
             #region RECAP FILTERS
             Console.WriteLine("\r\n\r\nPlans filters. The following filters will be used to select the plans:");
-            Console.WriteLine("Total dose between {0:0.00} and {1:0.00} Gy", minTotalDose, maxTotalDose);
+            Console.WriteLine("Total dose between {0:0.00} and {1:0.00} cGy", minTotalDose, maxTotalDose);
             Console.WriteLine("Keep planning approved plans?\t{0}", keepPAapprovedPlan);
             Console.WriteLine("Keep treatment approved plans?\t{0}", keepTAapprovedPlan);
             Console.WriteLine("Keep retired plans?\t{0}", keepRetiredPlan);
@@ -796,8 +796,8 @@ namespace VMS.TPS
                             if (plan.TotalDose.Dose < minTotalDose || plan.TotalDose.Dose > maxTotalDose)
                             {
                                 keepThisPlan = keepThisPlan * 0;
-                                Console.WriteLine("         refused: Total dose ({0:0.00} Gy) is not between {1} and {2} Gy", plan.TotalDose.Dose, minTotalDose, maxTotalDose);
-                                swLogFile.WriteLine("         refused: Total dose ({0:0.00} Gy) is not between {1} and {2} Gy", plan.TotalDose.Dose, minTotalDose, maxTotalDose);
+                                Console.WriteLine("         refused: Total dose ({0:0.00} cGy) is not between {1} and {2} cGy", plan.TotalDose.Dose, minTotalDose, maxTotalDose);
+                                swLogFile.WriteLine("         refused: Total dose ({0:0.00} cGy) is not between {1} and {2} cGy", plan.TotalDose.Dose, minTotalDose, maxTotalDose);
                             }
                         #endregion
 
@@ -1373,7 +1373,7 @@ namespace VMS.TPS
             {
                 Group eval = testMatch[0].Groups["evalpt"];
                 Group unit = testMatch[0].Groups["unit"];
-                DoseValue.DoseUnit du = DoseValue.DoseUnit.Gy;
+                DoseValue.DoseUnit du = DoseValue.DoseUnit.cGy;
                 DoseValue myD_something = new DoseValue(1000.1000, du);
                 //DoseValue myD_something;
                 double myD = Convert.ToDouble(eval.Value);
@@ -1394,7 +1394,7 @@ namespace VMS.TPS
                     Console.WriteLine("Dxx {0:0.00} {1}", myD_something.Dose, myD_something.Unit);
             }
             #endregion
-            #region V__Gy
+            #region V__cGy
             string v_at_d_pattern = @"^V(?<evalpt>\d+\p{P}\d+|\d+)(?<unit>(%|cc))$"; // matches V50.4cc or V50.4% 
                                                                                      //var
             testMatch = Regex.Matches(myDataToGet, v_at_d_pattern);
@@ -1402,7 +1402,7 @@ namespace VMS.TPS
             {
                 Group eval = testMatch[0].Groups["evalpt"];
                 Group unit = testMatch[0].Groups["unit"];
-                DoseValue.DoseUnit du = DoseValue.DoseUnit.Gy;
+                DoseValue.DoseUnit du = DoseValue.DoseUnit.cGy;
                 DoseValue myRequestedDose = new DoseValue(Convert.ToDouble(eval.Value), du);
 
                 if (unit.Value == "cc")
@@ -1551,7 +1551,7 @@ namespace VMS.TPS
                     totalDoseOfSum = totalDoseOfSum + IndividualPlan.TotalDose.Dose;
                 }
                 totalDoseOfSum = totalDoseOfSum * isodoseLvl;
-                DoseValue myDose = new DoseValue(totalDoseOfSum, DoseValue.DoseUnit.Gy);
+                DoseValue myDose = new DoseValue(totalDoseOfSum, DoseValue.DoseUnit.cGy);
 
                 double volIsodoseLvl = myPlan.GetVolumeAtDose(Body, myDose, VolumePresentation.AbsoluteCm3);
                 checkThat = Math.Round(volIsodoseLvl / myStruct.Volume, 3);
@@ -1569,7 +1569,7 @@ namespace VMS.TPS
                     totalDoseOfSum = totalDoseOfSum + IndividualPlan.TotalDose.Dose;
                 }
                 totalDoseOfSum = totalDoseOfSum * isodoseLvl;
-                DoseValue myDose = new DoseValue(totalDoseOfSum, DoseValue.DoseUnit.Gy);
+                DoseValue myDose = new DoseValue(totalDoseOfSum, DoseValue.DoseUnit.cGy);
                 double PIV = myPlan.GetVolumeAtDose(Body, myDose, VolumePresentation.AbsoluteCm3);
                 double TV_PIV = myPlan.GetVolumeAtDose(myStruct, myDose, VolumePresentation.AbsoluteCm3);
                 //Console.WriteLine("ttt {0} {1} {2}  ", TV_PIV, TV, PIV);
@@ -1591,7 +1591,7 @@ namespace VMS.TPS
             {
                 Group eval = testMatch[0].Groups["evalpt"];
                 Group unit = testMatch[0].Groups["unit"];
-                DoseValue.DoseUnit du = DoseValue.DoseUnit.Gy;
+                DoseValue.DoseUnit du = DoseValue.DoseUnit.cGy;
                 DoseValue myD_something = new DoseValue(1000.1000, du);
                 //DoseValue myD_something;
                 double myD = Convert.ToDouble(eval.Value);
@@ -1612,7 +1612,7 @@ namespace VMS.TPS
                     Console.WriteLine("Dxx {0:0.00} {1}", myD_something.Dose, myD_something.Unit);
             }
             #endregion
-            #region V__Gy
+            #region V__cGy
             string v_at_d_pattern = @"^V(?<evalpt>\d+\p{P}\d+|\d+)(?<unit>(%|cc))$"; // matches V50.4cc or V50.4% 
                                                                                      //var
             testMatch = Regex.Matches(myDataToGet, v_at_d_pattern);
@@ -1620,7 +1620,7 @@ namespace VMS.TPS
             {
                 Group eval = testMatch[0].Groups["evalpt"];
                 Group unit = testMatch[0].Groups["unit"];
-                DoseValue.DoseUnit du = DoseValue.DoseUnit.Gy;
+                DoseValue.DoseUnit du = DoseValue.DoseUnit.cGy;
                 DoseValue myRequestedDose = new DoseValue(Convert.ToDouble(eval.Value), du);
 
                 if (unit.Value == "cc")
